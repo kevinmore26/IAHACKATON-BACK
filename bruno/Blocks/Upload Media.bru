@@ -5,13 +5,13 @@ meta {
 }
 
 post {
-  url: {{baseUrl}}/api/v1/blocks/:id/upload
+  url: {{baseUrl}}/v1/blocks/:id/upload
   body: multipartForm
   auth: bearer
 }
 
 params:path {
-  id: <BLOCK_ID>
+  id: cmilbjzx00001vvmyt2lg5qo7
 }
 
 auth:bearer {
@@ -19,5 +19,5 @@ auth:bearer {
 }
 
 body:multipart-form {
-  file: @file()
+  file: @file(/Users/nestorxyz/Downloads/WhatsApp Image 2025-11-30 at 01.22.18.jpeg)
 }
