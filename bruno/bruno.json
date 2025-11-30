@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "ia-hackaton",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

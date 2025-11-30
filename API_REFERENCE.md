@@ -328,3 +328,66 @@ curl -X GET http://localhost:3333/v1/organizations/cm4.../home \
   "message": "Home data fetched successfully"
 }
 ```
+
+---
+
+## Scripts
+
+### Generate Video Script (Blocks)
+Generates a detailed shooting plan (blocks) for a specific content idea.
+
+**Requires Authentication**
+
+<span class="method post">POST</span> `/v1/scripts/generate`
+
+#### Parameters
+
+| Name | Type | Description |
+| :--- | :--- | :--- |
+| `ideaId` | string | **Required**. The ID of the content idea to generate a script for. |
+
+#### Example Request
+
+```bash
+curl -X POST http://localhost:3333/v1/scripts/generate \
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "ideaId": "cm4..."
+  }'
+```
+
+#### Response
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "cm4...",
+      "content_idea_id": "cm4...",
+      "type": "NARRATOR",
+      "script": "Hey, check this out!",
+      "instructions": "Smile at the camera.",
+      "duration_target": 5,
+      "order": 1,
+      "status": "WAITING_INPUT",
+      "created_at": "2023-10-27T10:00:00.000Z",
+      "updated_at": "2023-10-27T10:00:00.000Z"
+    },
+    {
+      "id": "cm4...",
+      "content_idea_id": "cm4...",
+      "type": "SHOWCASE",
+      "script": "(Voiceover) It is amazing.",
+      "instructions": "Show the product spinning.",
+      "duration_target": 3,
+      "order": 2,
+      "status": "WAITING_INPUT",
+      "created_at": "2023-10-27T10:00:00.000Z",
+      "updated_at": "2023-10-27T10:00:00.000Z"
+    }
+  ],
+  "message": "Script generated successfully"
+}
+```

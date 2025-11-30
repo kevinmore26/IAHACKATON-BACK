@@ -44,12 +44,36 @@ model content_ideas {
   organization_id String
   title           String
   script          String
+  status          String   @default("DRAFT") // DRAFT, SCRIPTED, PRODUCING, COMPLETED
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
 
-  organization organizations @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+  organization organizations  @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+  video_blocks video_blocks[]
 
   @@index([organization_id])
+}
+
+model video_blocks {
+  id              String @id @default(cuid())
+  content_idea_id String
+  type            String // NARRATOR, SHOWCASE
+  script          String
+  instructions    String
+  duration_target Int
+  order           Int
+  status          String @default("WAITING_INPUT") // WAITING_INPUT, PROCESSING, COMPLETED, FAILED
+
+  input_media_path     String? // Path in private bucket
+  input_media_type     String? // IMAGE, VIDEO
+  generated_video_path String? // Path in private bucket
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  content_idea content_ideas @relation(fields: [content_idea_id], references: [id], onDelete: Cascade)
+
+  @@index([content_idea_id])
 }
 
 model user_organizations {
