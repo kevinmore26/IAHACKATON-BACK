@@ -54,6 +54,7 @@ export async function signup(req: Request, res: Response) {
           email: user.email,
           created_at: user.created_at,
           updated_at: user.updated_at,
+          organizations: [], // New user has no organizations
         },
       },
       message: 'User created successfully',
@@ -78,9 +79,16 @@ export async function login(req: Request, res: Response) {
       });
     }
 
-    // Find user
+    // Find user with organizations
     const user = await prisma.users.findUnique({
       where: { email },
+      include: {
+        memberships: {
+          include: {
+            organization: true,
+          },
+        },
+      },
     });
 
     if (!user) {
@@ -115,6 +123,12 @@ export async function login(req: Request, res: Response) {
           email: user.email,
           created_at: user.created_at,
           updated_at: user.updated_at,
+          organizations: user.memberships.map((m) => ({
+            id: m.organization.id,
+            name: m.organization.name,
+            slug: m.organization.slug,
+            role: m.role,
+          })),
         },
       },
       message: 'Login successful',

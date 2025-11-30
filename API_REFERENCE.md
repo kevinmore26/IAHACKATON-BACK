@@ -53,7 +53,8 @@ curl -X POST http://localhost:3333/v1/auth/signup \
       "name": "John Doe",
       "email": "john@example.com",
       "created_at": "2023-10-27T10:00:00.000Z",
-      "updated_at": "2023-10-27T10:00:00.000Z"
+      "updated_at": "2023-10-27T10:00:00.000Z",
+      "organizations": []
     }
   },
   "message": "User created successfully"
@@ -97,7 +98,15 @@ curl -X POST http://localhost:3333/v1/auth/login \
       "name": "John Doe",
       "email": "john@example.com",
       "created_at": "2023-10-27T10:00:00.000Z",
-      "updated_at": "2023-10-27T10:00:00.000Z"
+      "updated_at": "2023-10-27T10:00:00.000Z",
+      "organizations": [
+        {
+          "id": "cm4...",
+          "name": "Acme Corp",
+          "slug": "acme-corp",
+          "role": "ADMIN"
+        }
+      ]
     }
   },
   "message": "Login successful"
