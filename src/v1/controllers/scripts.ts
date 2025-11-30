@@ -16,14 +16,29 @@ export async function generateScript(req: Request, res: Response) {
     }
 
     // Fetch the idea
+    // Fetch the idea
     const idea = await prisma.content_ideas.findUnique({
       where: { id: ideaId },
+      include: {
+        video_blocks: {
+          orderBy: { order: 'asc' },
+        },
+      },
     });
 
     if (!idea) {
       return res.status(404).json({
         success: false,
         message: 'Content idea not found',
+      });
+    }
+
+    // If blocks already exist, return them
+    if (idea.video_blocks.length > 0) {
+      return res.json({
+        success: true,
+        data: idea.video_blocks,
+        message: 'Script blocks retrieved successfully',
       });
     }
 
