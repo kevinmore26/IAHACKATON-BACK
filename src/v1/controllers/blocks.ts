@@ -6,8 +6,8 @@ import { downloadFile, uploadFile, getSignedUrl } from '../../lib/supabase';
 import fs from 'fs';
 import 'multer'; // Ensure types are loaded
 import { generateVideo } from '../../lib/veo';
-import { extractAudio, replaceAudio } from '../../lib/video-processor';
-import { transformAudio } from '../../lib/elevenlabs';
+import { extractAudio, replaceAudio, createSubtitleFile, burnCaptions } from '../../lib/video-processor';
+import { transformAudio, alignAudio } from '../../lib/elevenlabs';
 
 interface MulterRequest extends Request {
   file?: Express.Multer.File;
@@ -215,6 +215,51 @@ export async function generateBlockVideo(req: Request, res: Response) {
                 console.error('Error processing voice:', error.message);
             }
             // Fallback to original video if voice processing fails
+        }
+    }
+
+    // 3.5 Burn Captions (if we have a script)
+    if (block.script) {
+        try {
+             console.log('Generating captions...');
+             const tempAudioForAlignment = `/tmp/${id}_align.mp3`;
+             
+             // Extract audio from the video we have so far (finalVideoBuffer)
+             // We need to write it to disk first if it's not already
+             const currentVideoPath = `/tmp/${id}_current.mp4`;
+             fs.writeFileSync(currentVideoPath, finalVideoBuffer);
+             
+             await extractAudio(currentVideoPath, tempAudioForAlignment);
+             const audioBuffer = fs.readFileSync(tempAudioForAlignment);
+             
+             // Align
+             const alignment = await alignAudio(audioBuffer, block.script);
+             
+             // Create Subtitles
+             const subtitlePath = `/tmp/${id}.ass`;
+             await createSubtitleFile(alignment, subtitlePath);
+             
+             // Burn Captions
+             const captionedVideoPath = `/tmp/${id}_captioned.mp4`;
+             await burnCaptions(currentVideoPath, subtitlePath, captionedVideoPath);
+             
+             // Update final buffer
+             finalVideoBuffer = fs.readFileSync(captionedVideoPath);
+             
+             // Cleanup
+             try {
+                 fs.unlinkSync(currentVideoPath);
+                 fs.unlinkSync(tempAudioForAlignment);
+                 fs.unlinkSync(subtitlePath);
+                 fs.unlinkSync(captionedVideoPath);
+             } catch (e) {
+                 console.warn('Failed to cleanup caption temp files', e);
+             }
+             
+        } catch (error) {
+            console.error('Error adding captions:', error);
+            // Don't fail the whole process, just log it. 
+            // The video will be without captions but still usable.
         }
     }
 

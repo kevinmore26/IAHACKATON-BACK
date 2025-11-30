@@ -1,4 +1,7 @@
 import ffmpeg from 'fluent-ffmpeg';
+import fs from 'fs';
+import path from 'path';
+import { AlignmentData } from './elevenlabs';
 
 
 export const ENABLE_TRIM = true;
@@ -105,5 +108,121 @@ export async function replaceAudio(videoPath: string, audioPath: string, outputP
       .save(outputPath)
       .on('end', () => resolve())
       .on('error', (err) => reject(err));
+  });
+}
+
+function formatTime(seconds: number): string {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = Math.floor(seconds % 60);
+    const ms = Math.floor((seconds % 1) * 100);
+    return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}`;
+}
+
+export async function createSubtitleFile(alignment: AlignmentData, outputPath: string): Promise<void> {
+    // Group characters into words
+    const words: { text: string; start: number; end: number }[] = [];
+    let currentWord = '';
+    let wordStart = -1;
+
+    for (let i = 0; i < alignment.characters.length; i++) {
+        const char = alignment.characters[i];
+        const start = alignment.character_start_times_seconds[i];
+
+        if (wordStart === -1) wordStart = start;
+
+        if (char === ' ') {
+            if (currentWord) {
+                words.push({ text: currentWord, start: wordStart, end: alignment.character_end_times_seconds[i-1] });
+                currentWord = '';
+                wordStart = -1;
+            }
+        } else {
+            currentWord += char;
+        }
+    }
+    if (currentWord) {
+        words.push({ text: currentWord, start: wordStart, end: alignment.character_end_times_seconds[alignment.characters.length - 1] });
+    }
+
+    // Group words into caption segments (TikTok style: 1-3 words)
+    const segments: { text: string; start: number; end: number }[] = [];
+    let currentSegment: typeof words = [];
+    
+    for (const word of words) {
+        currentSegment.push(word);
+        
+        // Break if segment is long enough or ends with punctuation
+        const isLongEnough = currentSegment.length >= 3; // Max 3 words
+        const endsWithPunctuation = /[.!?]$/.test(word.text);
+        
+        if (isLongEnough || endsWithPunctuation) {
+            segments.push({
+                text: currentSegment.map(w => w.text).join(' '),
+                start: currentSegment[0].start,
+                end: currentSegment[currentSegment.length - 1].end
+            });
+            currentSegment = [];
+        }
+    }
+    if (currentSegment.length > 0) {
+        segments.push({
+            text: currentSegment.map(w => w.text).join(' '),
+            start: currentSegment[0].start,
+            end: currentSegment[currentSegment.length - 1].end
+        });
+    }
+
+    // Generate ASS content
+    const header = `[Script Info]
+ScriptType: v4.00+
+PlayResX: 1080
+PlayResY: 1920
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,Montserrat,80,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,1,0,0,0,100,100,0,0,1,3,0,2,10,10,150,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+`;
+
+    const events = segments.map(seg => {
+        return `Dialogue: 0,${formatTime(seg.start)},${formatTime(seg.end)},Default,,0,0,0,,${seg.text.toUpperCase()}`;
+    }).join('\n');
+
+    fs.writeFileSync(outputPath, header + events);
+}
+
+export async function burnCaptions(videoPath: string, subtitlePath: string, outputPath: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+        // We need to use the fonts directory
+        const fontDir = path.join(process.cwd(), 'assets', 'fonts');
+        
+        ffmpeg(videoPath)
+            .outputOptions([
+                `-vf subtitles=${subtitlePath}:fontsdir=${fontDir}`,
+                '-c:a copy'
+            ])
+            .save(outputPath)
+            .on('end', () => resolve())
+            .on('error', (err) => {
+                console.error('Error burning captions:', err);
+                reject(err);
+            });
+    });
+}
+
+export async function checkFfmpeg(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    ffmpeg.getAvailableFormats((err, formats) => {
+      if (err) {
+        console.error('FFmpeg check failed:', err);
+        reject(new Error('FFmpeg is not installed or not available'));
+      } else {
+        console.log('FFmpeg is installed and available');
+        resolve();
+      }
+    });
   });
 }

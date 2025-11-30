@@ -134,3 +134,46 @@ export async function generateAudio(text: string, voiceId: string): Promise<Buff
     throw new Error(errorMessage);
   }
 }
+
+export interface AlignmentData {
+  characters: string[];
+  character_start_times_seconds: number[];
+  character_end_times_seconds: number[];
+}
+
+export async function alignAudio(audioBuffer: Buffer, text: string): Promise<AlignmentData> {
+  try {
+    const formData = new FormData();
+    formData.append('audio', audioBuffer, { filename: 'audio.mp3', contentType: 'audio/mpeg' });
+    formData.append('text', text);
+
+    const response = await axios.post(
+      `${BASE_URL}/speech-to-text/alignment`,
+      formData,
+      {
+        headers: {
+          ...formData.getHeaders(),
+          'xi-api-key': ELEVENLABS_API_KEY,
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error: any) {
+    let errorMessage = 'Failed to align audio';
+    
+    if (error.response?.data) {
+        try {
+            const errorData = typeof error.response.data === 'string' 
+                ? JSON.parse(error.response.data) 
+                : error.response.data;
+            errorMessage = errorData.detail?.message || errorData.message || errorMessage;
+        } catch (e) {
+            errorMessage = error.message || errorMessage;
+        }
+    }
+
+    console.error('Error aligning audio with ElevenLabs:', errorMessage);
+    throw new Error(errorMessage);
+  }
+}
