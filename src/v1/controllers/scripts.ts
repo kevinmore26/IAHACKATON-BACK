@@ -16,7 +16,6 @@ export async function generateScript(req: Request, res: Response) {
     }
 
     // Fetch the idea
-    // Fetch the idea
     const idea = await prisma.content_ideas.findUnique({
       where: { id: ideaId },
       include: {
