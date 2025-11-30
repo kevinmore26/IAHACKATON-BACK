@@ -1,0 +1,20 @@
+meta {
+  name: Clone Voice
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/v1/voices/clone
+  body: multipartForm
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:multipart-form {
+  name: Nestor
+  audio: @file(/Users/nestorxyz/Downloads/WhatsApp Audio 2025-11-30 at 05.04.26.mp3)
+}

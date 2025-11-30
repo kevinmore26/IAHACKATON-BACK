@@ -17,19 +17,15 @@ export async function stitchVideos(
       command.input(path);
     });
 
-    // Create a complex filter to scale all inputs to 720x1280 (9:16) and concatenate
-    // This ensures that if inputs have slightly different dimensions, they are normalized.
-    // We assume 720x1280 as a standard 9:16 HD resolution.
-    
-    const filterInputs = videoPaths.map((_, i) => `[${i}:v]scale=720:1280:force_original_aspect_ratio=decrease,pad=720:1280:(ow-iw)/2:(oh-ih)/2[v${i}];`).join('');
-    // Interleave video and audio streams for concat: [v0][0:a][v1][1:a]...
-    const concatFilter = videoPaths.map((_, i) => `[v${i}][${i}:a]`).join('') + `concat=n=${videoPaths.length}:v=1:a=1[outv][outa]`;
+    // We assume all inputs are already 9:16 (e.g. 720x1280).
+    // Interleave video and audio streams for concat: [0:v][0:a][1:v][1:a]...
+    const concatFilter = videoPaths.map((_, i) => `[${i}:v][${i}:a]`).join('') + `concat=n=${videoPaths.length}:v=1:a=1[outv][outa]`;
 
     // Note: We are now including audio (a=1).
     // We assume all input videos have an audio stream.
 
     command
-      .complexFilter(filterInputs + concatFilter)
+      .complexFilter(concatFilter)
       .outputOptions('-map [outv]')
       .outputOptions('-map [outa]')
       .outputOptions('-c:v libx264')

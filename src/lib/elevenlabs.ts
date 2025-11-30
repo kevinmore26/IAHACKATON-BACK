@@ -55,3 +55,82 @@ export async function transformAudio(audioPath: string, voiceId: string): Promis
     throw new Error(errorMessage);
   }
 }
+
+export async function cloneVoice(name: string, audioPaths: string[]): Promise<string> {
+  try {
+    const formData = new FormData();
+    formData.append('name', name);
+    
+    for (const path of audioPaths) {
+      formData.append('files', fs.createReadStream(path));
+    }
+
+    const response = await axios.post(
+      `${BASE_URL}/voices/add`,
+      formData,
+      {
+        headers: {
+          ...formData.getHeaders(),
+          'xi-api-key': ELEVENLABS_API_KEY,
+        },
+      }
+    );
+
+    return response.data.voice_id;
+  } catch (error: any) {
+    let errorMessage = 'Failed to clone voice';
+    
+    if (error.response?.data) {
+        try {
+            const errorData = typeof error.response.data === 'string' 
+                ? JSON.parse(error.response.data) 
+                : error.response.data;
+            errorMessage = errorData.detail?.message || errorData.message || errorMessage;
+        } catch (e) {
+            errorMessage = error.message || errorMessage;
+        }
+    }
+
+    console.error('Error cloning voice with ElevenLabs:', errorMessage);
+    throw new Error(errorMessage);
+  }
+}
+
+export async function generateAudio(text: string, voiceId: string): Promise<Buffer> {
+  try {
+    const response = await axios.post(
+      `${BASE_URL}/text-to-speech/${voiceId}`,
+      {
+        text,
+        model_id: 'eleven_multilingual_v2',
+        voice_settings: {
+          stability: 0.5,
+          similarity_boost: 0.75,
+        },
+      },
+      {
+        headers: {
+          'xi-api-key': ELEVENLABS_API_KEY,
+          'Content-Type': 'application/json',
+        },
+        responseType: 'arraybuffer',
+      }
+    );
+
+    return Buffer.from(response.data);
+  } catch (error: any) {
+    let errorMessage = 'Failed to generate audio';
+    
+    if (error.response?.data) {
+        try {
+            const errorData = JSON.parse(error.response.data.toString());
+            errorMessage = errorData.detail?.message || errorData.message || errorMessage;
+        } catch (e) {
+            errorMessage = error.message || errorMessage;
+        }
+    }
+
+    console.error('Error generating audio with ElevenLabs:', errorMessage);
+    throw new Error(errorMessage);
+  }
+}
