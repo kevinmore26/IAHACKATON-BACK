@@ -329,7 +329,48 @@ curl -X GET http://localhost:3333/v1/organizations/cm4.../home \
 }
 ```
 
+
 ---
+
+### Get Organization Videos
+Returns the last 20 generated videos for the organization with temporary public URLs.
+
+**Requires Authentication**
+
+<span class="method get">GET</span> `/v1/organizations/:id/videos`
+
+#### Example Request
+
+```bash
+curl -X GET http://localhost:3333/v1/organizations/cm4.../videos \
+  -H "Authorization: Bearer <your_token>"
+```
+
+#### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "videos": [
+      {
+        "id": "cm4...",
+        "organization_id": "cm4...",
+        "title": "Behind the Scenes",
+        "script": "Start with a shot of the office...",
+        "final_video_path": "renders/cm4....mp4",
+        "signed_url": "https://supabase....",
+        "created_at": "2023-10-27T10:00:00.000Z",
+        "updated_at": "2023-10-27T10:15:00.000Z"
+      }
+    ]
+  },
+  "message": "Videos fetched successfully"
+}
+```
+
+---
+
 
 ## Scripts
 

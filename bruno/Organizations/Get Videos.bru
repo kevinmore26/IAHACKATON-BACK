@@ -1,0 +1,19 @@
+meta {
+  name: Get Organization Videos
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/v1/organizations/:id/videos
+  body: none
+  auth: bearer
+}
+
+params:path {
+  id: cm4...
+}
+
+auth:bearer {
+  token: {{token}}
+}
