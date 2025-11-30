@@ -47,13 +47,13 @@ const contentIdeasSchema = z.object({
       title: z.string().describe('A catchy title for the video.'),
       script: z
         .string()
-        .describe('A short video script (approx. 10-23 seconds).'),
+        .describe('A short video script (approx. 10-20 seconds).'),
     })
   ),
 });
 
 export async function generateContentIdeas(
-  details: BusinessDetails,
+  details: BusinessDetails & { business_brief: string; },
   count: number = 5
 ): Promise<Array<{ title: string; script: string }>> {
   const prompt = `
@@ -64,6 +64,9 @@ export async function generateContentIdeas(
     Main Product: ${details.main_product}
     Content Objective: ${details.content_objective}
     Target Audience: ${details.target_audience}
+    Business Brief: ${details.business_brief}
+    
+    The content ideas should be concise and engaging, focusing on the business's value proposition and target audience. Each idea should be under 20 seconds.
   `;
 
   try {

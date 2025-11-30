@@ -196,6 +196,7 @@ export async function generateIdeas(req: AuthRequest, res: Response) {
         main_product: org.main_product || '',
         content_objective: org.content_objective || '',
         target_audience: org.target_audience || '',
+        business_brief: org.business_brief || '',
       },
       count
     );

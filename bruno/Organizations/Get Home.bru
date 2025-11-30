@@ -1,0 +1,21 @@
+meta {
+  name: Get Home
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/v1/organizations/{{orgId}}/home
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+script:post-response {
+  if (res.status === 200 && res.body.data.ideas.length > 0) {
+    bru.setEnvVar("ideaId", res.body.data.ideas[0].id);
+  }
+}

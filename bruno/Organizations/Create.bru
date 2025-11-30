@@ -1,0 +1,31 @@
+meta {
+  name: Create Organization
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/v1/organizations
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "name": "My AI Startup",
+    "business_type": "Technology",
+    "main_product": "AI Video Generator",
+    "content_objective": "User Acquisition",
+    "target_audience": "Content Creators"
+  }
+}
+
+script:post-response {
+  if (res.status === 201) {
+    bru.setEnvVar("orgId", res.body.data.organization.id);
+  }
+}

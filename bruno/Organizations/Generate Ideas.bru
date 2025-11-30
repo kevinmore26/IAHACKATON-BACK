@@ -1,0 +1,21 @@
+meta {
+  name: Generate Ideas
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/v1/organizations/{{orgId}}/generate-ideas
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "count": 3
+  }
+}
