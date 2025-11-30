@@ -515,3 +515,45 @@ curl -X POST http://localhost:3333/v1/scripts/cm4.../render \
   "message": "Video rendered successfully"
 }
 ```
+
+---
+
+## Users
+
+### List all users
+Returns a list of all users. This endpoint is for internal use and does not require authentication.
+
+<span class="method get">GET</span> `/v1/users`
+
+#### Example Request
+
+```bash
+curl -X GET http://localhost:3333/v1/users
+```
+
+#### Response
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "cm4...",
+      "name": "John Doe",
+      "email": "john@example.com",
+      "created_at": "2023-10-27T10:00:00.000Z",
+      "updated_at": "2023-10-27T10:00:00.000Z",
+      "memberships": [
+        {
+          "organization": {
+            "id": "cm4...",
+            "name": "Acme Corp",
+            "slug": "acme-corp"
+          }
+        }
+      ]
+    }
+  ],
+  "message": "Users fetched successfully"
+}
+```
