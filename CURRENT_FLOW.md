@@ -117,3 +117,42 @@ Returns the list of created video blocks.
 *   `duration_target` (Seconds)
 *   `order` (Sequence index)
 *   `status` (WAITING_INPUT, READY, etc.)
+
+---
+
+## 4. Block Media & Generation
+**Endpoints:**
+*   `POST /api/v1/blocks/:id/upload` (Multipart Form Data)
+*   `POST /api/v1/blocks/:id/generate`
+
+Handles the media content for each block.
+
+### Upload Input (Multipart)
+*   `file`: Image (for generation) or Video (for direct use).
+
+### Generation Process
+1.  **Upload**: User uploads an image (for NARRATOR/SHOWCASE generation) or a video (to use directly).
+2.  **Generate**: User triggers generation for a block.
+    *   **Input**: Uses the uploaded image and the block's script.
+    *   **AI Step**: Calls Google Veo (VideoFX) to generate a video clip (4, 6, or 8s).
+    *   **Output**: Saves the generated video path.
+
+### Output
+Returns the updated block object with `input_media_path` or `generated_video_path`.
+
+---
+
+## 5. Final Video Rendering
+**Endpoint:** `POST /api/v1/scripts/:id/render`
+
+Stitches all block videos into a final result.
+
+### Process
+1.  Validates that all blocks have a video (either uploaded or generated).
+2.  Downloads all video clips.
+3.  **Processing**: Stitches clips together using `ffmpeg` (normalizing to 9:16).
+4.  Uploads the final video to storage.
+5.  Updates the `content_idea` status to `COMPLETED`.
+
+### Output
+Returns the updated content idea with `final_video_path`.
