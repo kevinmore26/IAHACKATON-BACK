@@ -159,15 +159,12 @@ export async function generateBlockVideo(req: Request, res: Response) {
     // If we have a voice ID, we need to process the audio
     let finalVideoBuffer = videoBuffer;
     
-    // Fetch content idea to check for voice_id
-    const contentIdea = await prisma.content_ideas.findUnique({
-      where: { id: block.content_idea_id },
-      include: { voice: true }
-    });
+    // Check for voice_id in request body (ElevenLabs Voice ID)
+    const { voice_id } = req.body;
 
-    if (contentIdea?.voice?.elevenlabs_voice_id) {
+    if (voice_id) {
         try {
-            console.log('Voice ID found, processing audio...');
+            console.log(`Voice ID ${voice_id} provided, processing audio...`);
             const tempVideoPath = `/tmp/${id}_raw.mp4`;
             const tempAudioPath = `/tmp/${id}_audio.mp3`;
             const tempTransformedAudioPath = `/tmp/${id}_transformed.mp3`;
@@ -180,7 +177,7 @@ export async function generateBlockVideo(req: Request, res: Response) {
             await extractAudio(tempVideoPath, tempAudioPath);
 
             // Transform audio
-            const transformedAudioBuffer = await transformAudio(tempAudioPath, contentIdea.voice.elevenlabs_voice_id);
+            const transformedAudioBuffer = await transformAudio(tempAudioPath, voice_id);
             fs.writeFileSync(tempTransformedAudioPath, transformedAudioBuffer);
 
             // Mix audio

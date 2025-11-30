@@ -38,6 +38,20 @@ model organizations {
   members       user_organizations[]
   content_ideas content_ideas[]
   voices        voices[]
+  gallery_items gallery_items[]
+}
+
+model gallery_items {
+  id              String   @id @default(cuid())
+  organization_id String
+  type            String // IMAGE, VIDEO
+  path            String // Path in storage
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  organization organizations @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+
+  @@index([organization_id])
 }
 
 model content_ideas {

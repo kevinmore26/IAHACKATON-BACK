@@ -598,3 +598,83 @@ curl -X GET http://localhost:3333/v1/users
   "message": "Users fetched successfully"
 }
 ```
+
+---
+
+## Gallery
+
+### Upload Gallery Item
+Uploads an image or video to the organization's gallery.
+
+**Requires Authentication**
+
+<span class="method post">POST</span> `/v1/organizations/:id/gallery`
+
+#### Parameters
+
+| Name | Type | Description |
+| :--- | :--- | :--- |
+| `file` | file | **Required**. Image or Video file. |
+
+#### Example Request
+
+```bash
+curl -X POST http://localhost:3333/v1/organizations/cm4.../gallery \
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: multipart/form-data" \
+  -F "file=@/path/to/image.png"
+```
+
+#### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "cm4...",
+    "organization_id": "cm4...",
+    "type": "IMAGE",
+    "path": "gallery/cm4.../123.png",
+    "created_at": "2023-10-27T10:00:00.000Z",
+    "updated_at": "2023-10-27T10:00:00.000Z",
+    "signed_url": "https://supabase...."
+  },
+  "message": "Gallery item uploaded successfully"
+}
+```
+
+---
+
+### Get Gallery
+Retrieves all gallery items for an organization.
+
+**Requires Authentication**
+
+<span class="method get">GET</span> `/v1/organizations/:id/gallery`
+
+#### Example Request
+
+```bash
+curl -X GET http://localhost:3333/v1/organizations/cm4.../gallery \
+  -H "Authorization: Bearer <your_token>"
+```
+
+#### Response
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "cm4...",
+      "organization_id": "cm4...",
+      "type": "IMAGE",
+      "path": "gallery/cm4.../123.png",
+      "created_at": "2023-10-27T10:00:00.000Z",
+      "updated_at": "2023-10-27T10:00:00.000Z",
+      "signed_url": "https://supabase...."
+    }
+  ],
+  "message": "Gallery fetched successfully"
+}
+```

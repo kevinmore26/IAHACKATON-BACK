@@ -1,0 +1,19 @@
+meta {
+  name: Upload Gallery Item
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/v1/organizations/{{orgId}}/gallery
+  body: multipartForm
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:multipart-form {
+  file: @file(/path/to/image.png)
+}
