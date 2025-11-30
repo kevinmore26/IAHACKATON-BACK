@@ -1,4 +1,4 @@
-import { GoogleGenAI } from '@google/genai';
+import { GenerateVideosParameters, GoogleGenAI } from '@google/genai';
 import { env } from '../env';
 import fs from 'fs';
 import path from 'path';
@@ -15,11 +15,13 @@ export async function generateVideo(
     console.log('Starting Veo generation...');
     let operation;
 
-    const commonParams = {
+    const commonParams:GenerateVideosParameters = {
       model: 'veo-3.1-generate-preview',
       prompt: prompt,
-      aspectRatio: '9:16',
-      durationSeconds: durationSeconds.toString(), // API expects string "4", "6", "8"
+      config: { 
+        aspectRatio: '9:16',
+        durationSeconds: durationSeconds
+      }
     };
 
     if (imageBuffer) {
