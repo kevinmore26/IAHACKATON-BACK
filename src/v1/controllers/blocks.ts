@@ -6,6 +6,8 @@ import { downloadFile, uploadFile, getSignedUrl } from '../../lib/supabase';
 import fs from 'fs';
 import 'multer'; // Ensure types are loaded
 import { generateVideo } from '../../lib/veo';
+import { extractAudio, replaceAudio } from '../../lib/video-processor';
+import { transformAudio } from '../../lib/elevenlabs';
 
 interface MulterRequest extends Request {
   file?: Express.Multer.File;
@@ -154,8 +156,57 @@ export async function generateBlockVideo(req: Request, res: Response) {
     }
 
     // 3. Upload generated video
+    // If we have a voice ID, we need to process the audio
+    let finalVideoBuffer = videoBuffer;
+    
+    // Fetch content idea to check for voice_id
+    const contentIdea = await prisma.content_ideas.findUnique({
+      where: { id: block.content_idea_id },
+      include: { voice: true }
+    });
+
+    if (contentIdea?.voice?.elevenlabs_voice_id) {
+        try {
+            console.log('Voice ID found, processing audio...');
+            const tempVideoPath = `/tmp/${id}_raw.mp4`;
+            const tempAudioPath = `/tmp/${id}_audio.mp3`;
+            const tempTransformedAudioPath = `/tmp/${id}_transformed.mp3`;
+            const tempFinalVideoPath = `/tmp/${id}_final.mp4`;
+
+            // Save raw video
+            fs.writeFileSync(tempVideoPath, videoBuffer);
+
+            // Extract audio
+            await extractAudio(tempVideoPath, tempAudioPath);
+
+            // Transform audio
+            const transformedAudioBuffer = await transformAudio(tempAudioPath, contentIdea.voice.elevenlabs_voice_id);
+            fs.writeFileSync(tempTransformedAudioPath, transformedAudioBuffer);
+
+            // Mix audio
+            await replaceAudio(tempVideoPath, tempTransformedAudioPath, tempFinalVideoPath);
+
+            // Read final video
+            finalVideoBuffer = fs.readFileSync(tempFinalVideoPath);
+
+            // Cleanup
+            try {
+                fs.unlinkSync(tempVideoPath);
+                fs.unlinkSync(tempAudioPath);
+                fs.unlinkSync(tempTransformedAudioPath);
+                fs.unlinkSync(tempFinalVideoPath);
+            } catch (e) {
+                console.warn('Failed to cleanup temp files', e);
+            }
+
+        } catch (error) {
+            console.error('Error processing voice:', error);
+            // Fallback to original video if voice processing fails
+        }
+    }
+
     const outputPath = `generated/${id}.mp4`;
-    const uploadedPath = await uploadFile(outputPath, videoBuffer, 'video/mp4');
+    const uploadedPath = await uploadFile(outputPath, finalVideoBuffer, 'video/mp4');
 
     if (!uploadedPath) {
        await prisma.video_blocks.update({

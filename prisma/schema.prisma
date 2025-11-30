@@ -37,6 +37,7 @@ model organizations {
 
   members       user_organizations[]
   content_ideas content_ideas[]
+  voices        voices[]
 }
 
 model content_ideas {
@@ -51,6 +52,24 @@ model content_ideas {
 
   organization organizations  @relation(fields: [organization_id], references: [id], onDelete: Cascade)
   video_blocks video_blocks[]
+  voice        voices?        @relation(fields: [voice_id], references: [id])
+  voice_id     String?
+
+  @@index([organization_id])
+  @@index([voice_id])
+}
+
+model voices {
+  id                  String   @id @default(cuid())
+  elevenlabs_voice_id String
+  name                String
+  preview_url         String
+  organization_id     String?
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+
+  organization  organizations?  @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+  content_ideas content_ideas[]
 
   @@index([organization_id])
 }

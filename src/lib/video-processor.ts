@@ -44,3 +44,31 @@ export async function stitchVideos(
       });
   });
 }
+
+export async function extractAudio(videoPath: string, outputPath: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    ffmpeg(videoPath)
+      .output(outputPath)
+      .noVideo()
+      .audioCodec('libmp3lame')
+      .on('end', () => resolve())
+      .on('error', (err) => reject(err))
+      .run();
+  });
+}
+
+export async function replaceAudio(videoPath: string, audioPath: string, outputPath: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    ffmpeg()
+      .input(videoPath)
+      .input(audioPath)
+      .outputOptions('-c:v copy') // Copy video stream without re-encoding
+      .outputOptions('-c:a aac') // Re-encode audio to AAC
+      .outputOptions('-map 0:v:0') // Use video from first input
+      .outputOptions('-map 1:a:0') // Use audio from second input
+      .outputOptions('-shortest') // Finish when the shortest input ends
+      .save(outputPath)
+      .on('end', () => resolve())
+      .on('error', (err) => reject(err));
+  });
+}
