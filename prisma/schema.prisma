@@ -56,14 +56,15 @@ model content_ideas {
 }
 
 model video_blocks {
-  id              String @id @default(cuid())
+  id              String  @id @default(cuid())
   content_idea_id String
   type            String // NARRATOR, SHOWCASE
   script          String
+  visual_prompt   String? // Specific prompt for Veo
   instructions    String
   duration_target Int
   order           Int
-  status          String @default("WAITING_INPUT") // WAITING_INPUT, PROCESSING, COMPLETED, FAILED
+  status          String  @default("WAITING_INPUT") // WAITING_INPUT, PROCESSING, COMPLETED, FAILED
 
   input_media_path     String? // Path in private bucket
   input_media_type     String? // IMAGE, VIDEO

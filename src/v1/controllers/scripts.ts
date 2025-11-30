@@ -65,6 +65,7 @@ export async function generateScript(req: Request, res: Response) {
             content_idea_id: ideaId,
             type: block.type,
             script: block.script,
+            visual_prompt: block.visualPrompt,
             instructions: block.userInstructions,
             duration_target: block.durationTarget,
             order: i + 1,

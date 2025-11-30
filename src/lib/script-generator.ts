@@ -6,6 +6,7 @@ export interface Block {
   type: "NARRATOR" | "SHOWCASE";
   durationTarget: number;
   script: string;
+  visualPrompt: string;
   userInstructions: string;
 }
 
@@ -18,6 +19,7 @@ const blockSchema = z.object({
   type: z.enum(["NARRATOR", "SHOWCASE"]).describe("The type of the block."),
   durationTarget: z.coerce.number().describe("Target duration in seconds."),
   script: z.string().describe("The exact script/words to be spoken or shown."),
+  visualPrompt: z.string().describe("A detailed visual prompt for video generation using the formula: [Cinematography] + [Subject] + [Action] + [Context] + [Style & Ambiance]. Must describe a realistic video filmed from a cellphone."),
   userInstructions: z.string().describe("Direct instructions for the user on what to film or upload."),
 });
 
@@ -59,6 +61,22 @@ export class GoogleScriptGenerator implements IScriptGenerator {
       IMPORTANTE: Devuelve un objeto JSON con una única clave "blocks" que contenga el array de objetos.
       NO devuelvas los bloques como cadenas JSON stringified. Devuélvelos como objetos JSON reales.
       
+      PARA "visualPrompt":
+      Usa SIEMPRE esta fórmula: [Cinematography] + [Subject] + [Action] + [Context] + [Style & Ambiance]
+      Estilo OBLIGATORIO: "Realistic video filmed from a cellphone, vertical 9:16 aspect ratio, amateur lighting, slightly shaky handheld camera movement."
+      IMPORTANTE: El visualPrompt debe ser DETALLADO y DESCRIPTIVO (2-3 oraciones). Describe la iluminación, texturas, colores y movimiento de cámara con precisión cinematográfica.
+      
+      Reglas por Tipo de Bloque:
+      - NARRATOR:
+        * Cinematography: "Selfie shot, POV from a cellphone, close-up."
+        * Focus: El usuario/narrador hablando a la cámara.
+        * Ejemplo: "Selfie shot from a cellphone, a young man talking directly to the camera, holding the phone with one hand, in a home office, realistic lighting."
+      
+      - SHOWCASE:
+        * Cinematography: "Handheld close-up shot from a cellphone."
+        * Focus: El objeto, producto o entorno descrito.
+        * Ejemplo: "Handheld close-up shot from a cellphone, panning over a laptop keyboard, realistic texture, natural lighting coming from a window."
+      
       Ejemplo de Salida:
       {
         "blocks": [
@@ -66,12 +84,14 @@ export class GoogleScriptGenerator implements IScriptGenerator {
             "type": "NARRATOR",
             "durationTarget": "6",
             "script": "¡Hola, mira esto!",
+            "visualPrompt": "Selfie shot from a cellphone, close-up of a young hispanic man smiling and talking to the camera, wearing a casual t-shirt, in a bright modern kitchen, realistic lighting, handheld camera style.",
             "userInstructions": "Sonríe a la cámara con energía."
           },
           {
             "type": "SHOWCASE",
             "durationTarget": "4",
             "script": "(Voz en off) Es increíble.",
+            "visualPrompt": "Handheld close-up shot from a cellphone, hands unboxing a sleek gadget on a wooden table, natural sunlight coming from a window, realistic texture, handheld camera movement.",
             "userInstructions": "Muestra el producto girando."
           }
         ]
@@ -95,9 +115,10 @@ export class GoogleScriptGenerator implements IScriptGenerator {
                     type: { type: "STRING", enum: ["NARRATOR", "SHOWCASE"], description: "The type of the block." },
                     durationTarget: { type: "STRING", enum: ["4", "6", "8"], description: "Target duration in seconds (must be 4, 6, or 8)." },
                     script: { type: "STRING", description: "The exact script/words to be spoken or shown." },
+                    visualPrompt: { type: "STRING", description: "A detailed visual prompt for video generation using the formula: [Cinematography] + [Subject] + [Action] + [Context] + [Style & Ambiance]. Must describe a realistic video filmed from a cellphone." },
                     userInstructions: { type: "STRING", description: "Direct instructions for the user on what to film or upload." },
                   },
-                  required: ["type", "durationTarget", "script", "userInstructions"],
+                  required: ["type", "durationTarget", "script", "visualPrompt", "userInstructions"],
                 },
               },
             },

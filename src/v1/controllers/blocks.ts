@@ -132,7 +132,18 @@ export async function generateBlockVideo(req: Request, res: Response) {
     // 2. Call Veo
     // Ensure duration is one of the allowed values, default to 6 if somehow invalid
     const duration = (block.duration_target === 4 || block.duration_target === 8) ? block.duration_target : 4;
-    const videoBuffer = await generateVideo(block.script, imageBuffer, duration);
+    
+    // Combine fields to create a rich prompt for Veo
+    // Veo 3.1 supports Dialogue and Action descriptions.
+    const promptParts = [
+      block.visual_prompt, // The visual scene description
+      block.instructions ? `Action: ${block.instructions}` : null, // User instructions as action
+      block.script ? `Dialogue: "${block.script}"` : null // Spoken script as dialogue
+    ].filter(Boolean);
+
+    const promptToUse = promptParts.join('\n');
+    
+    const videoBuffer = await generateVideo(promptToUse, imageBuffer, duration);
 
     if (!videoBuffer) {
        await prisma.video_blocks.update({
