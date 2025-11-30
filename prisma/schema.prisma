@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model users {
+  id         String   @id @default(cuid())
+  name       String
+  email      String   @unique
+  password   String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  memberships user_organizations[]
+}
+
+model organizations {
+  id         String   @id @default(cuid())
+  slug       String   @unique
+  name       String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  members user_organizations[]
+}
+
+model user_organizations {
+  id              String   @id @default(cuid())
+  user_id         String
+  organization_id String
+  role            role
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  user         users         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  organization organizations @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, organization_id])
+  @@index([organization_id])
+  @@index([user_id])
+}
+
+enum role {
+  ADMIN
+  MEMBER
+}
