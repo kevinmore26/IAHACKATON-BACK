@@ -6,7 +6,7 @@ meta {
 
 post {
   url: {{baseUrl}}/v1/blocks/:id/generate
-  body: none
+  body: json
   auth: bearer
 }
 
@@ -16,4 +16,8 @@ params:path {
 
 auth:bearer {
   token: {{token}}
+}
+
+body:json {
+  {"voice_id":"cmilidbw70000vvxa53ei2yfo"}
 }

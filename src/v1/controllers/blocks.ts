@@ -159,12 +159,24 @@ export async function generateBlockVideo(req: Request, res: Response) {
     // If we have a voice ID, we need to process the audio
     let finalVideoBuffer = videoBuffer;
     
-    // Check for voice_id in request body (ElevenLabs Voice ID)
+    // Check for voice_id in request body (Database Voice ID)
     const { voice_id } = req.body;
 
     if (voice_id) {
         try {
-            console.log(`Voice ID ${voice_id} provided, processing audio...`);
+            // Fetch voice details from database
+            const voiceRecord = await prisma.voices.findUnique({
+                where: { id: voice_id }
+            });
+
+            if (!voiceRecord) {
+                console.warn(`Voice with ID ${voice_id} not found in database`);
+                throw new Error('Voice not found');
+            }
+
+            const elevenLabsVoiceId = voiceRecord.elevenlabs_voice_id;
+            console.log(`Processing audio with Voice: ${voiceRecord.name} (${elevenLabsVoiceId})...`);
+
             const tempVideoPath = `/tmp/${id}_raw.mp4`;
             const tempAudioPath = `/tmp/${id}_audio.mp3`;
             const tempTransformedAudioPath = `/tmp/${id}_transformed.mp3`;
@@ -177,7 +189,7 @@ export async function generateBlockVideo(req: Request, res: Response) {
             await extractAudio(tempVideoPath, tempAudioPath);
 
             // Transform audio
-            const transformedAudioBuffer = await transformAudio(tempAudioPath, voice_id);
+            const transformedAudioBuffer = await transformAudio(tempAudioPath, elevenLabsVoiceId);
             fs.writeFileSync(tempTransformedAudioPath, transformedAudioBuffer);
 
             // Mix audio
@@ -196,8 +208,12 @@ export async function generateBlockVideo(req: Request, res: Response) {
                 console.warn('Failed to cleanup temp files', e);
             }
 
-        } catch (error) {
-            console.error('Error processing voice:', error);
+        } catch (error: any) {
+            if (error.message === 'ELEVENLABS_QUOTA_EXCEEDED') {
+                console.warn('⚠️ ElevenLabs quota exceeded. Falling back to original Veo audio.');
+            } else {
+                console.error('Error processing voice:', error.message);
+            }
             // Fallback to original video if voice processing fails
         }
     }

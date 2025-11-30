@@ -1,0 +1,19 @@
+meta {
+  name: Get Organization Voices
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/v1/organizations/:id/voices
+  body: none
+  auth: bearer
+}
+
+params:path {
+  id: cmil6lgmk0001vvbe3o1oi7mv
+}
+
+auth:bearer {
+  token: {{token}}
+}

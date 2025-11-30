@@ -366,3 +366,60 @@ export async function getOrganizationVideos(req: AuthRequest, res: Response) {
     });
   }
 }
+
+export async function getOrganizationVoices(req: AuthRequest, res: Response) {
+  try {
+    const { id } = req.params;
+
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not authenticated',
+      });
+    }
+
+    // Check if user belongs to organization
+    const userOrg = await prisma.user_organizations.findUnique({
+      where: {
+        user_id_organization_id: {
+          user_id: req.user.id,
+          organization_id: id,
+        },
+      },
+    });
+
+    if (!userOrg) {
+      return res.status(403).json({
+        success: false,
+        message: 'User does not belong to this organization',
+      });
+    }
+
+    // Fetch voices: Public (organization_id is null) OR belonging to this organization
+    const voices = await prisma.voices.findMany({
+      where: {
+        OR: [
+          { organization_id: null },
+          { organization_id: id },
+        ],
+      },
+      orderBy: {
+        name: 'asc',
+      },
+    });
+
+    return res.json({
+      success: true,
+      data: {
+        voices,
+      },
+      message: 'Voices fetched successfully',
+    });
+  } catch (error) {
+    console.error('Error in getOrganizationVoices:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+}

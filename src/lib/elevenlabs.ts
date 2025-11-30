@@ -32,7 +32,26 @@ export async function transformAudio(audioPath: string, voiceId: string): Promis
 
     return Buffer.from(response.data);
   } catch (error: any) {
-    console.error('Error transforming audio with ElevenLabs:', error.response?.data || error.message);
-    throw new Error('Failed to transform audio');
+    let errorMessage = 'Failed to transform audio';
+    let errorStatus = 'unknown';
+
+    if (error.response?.data) {
+        try {
+            // Try to parse the buffer as JSON
+            const errorData = JSON.parse(error.response.data.toString());
+            errorMessage = errorData.detail?.message || errorData.message || errorMessage;
+            errorStatus = errorData.detail?.status || errorStatus;
+            
+            if (errorStatus === 'quota_exceeded') {
+                throw new Error('ELEVENLABS_QUOTA_EXCEEDED');
+            }
+        } catch (e) {
+            // If parsing fails, use the raw message if available
+            errorMessage = error.message || errorMessage;
+        }
+    }
+
+    console.error('Error transforming audio with ElevenLabs:', errorMessage);
+    throw new Error(errorMessage);
   }
 }

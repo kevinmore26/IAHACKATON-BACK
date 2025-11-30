@@ -5,6 +5,7 @@ import {
   generateIdeas,
   getHome,
   getOrganizationVideos,
+  getOrganizationVoices,
 } from './controllers/organizations';
 import { uploadGalleryItem, getGallery } from './controllers/gallery';
 import { verifyUserToken } from '../middleware/auth';
@@ -20,6 +21,7 @@ router.get('/', verifyUserToken, getUserOrganizations);
 router.post('/:id/generate-ideas', verifyUserToken, generateIdeas);
 router.get('/:id/home', verifyUserToken, getHome);
 router.get('/:id/videos', verifyUserToken, getOrganizationVideos);
+router.get('/:id/voices', verifyUserToken, getOrganizationVoices);
 
 // Gallery routes
 router.post('/:id/gallery', verifyUserToken, upload.single('file'), uploadGalleryItem);

@@ -18,17 +18,15 @@ export async function generateVideo(
     const commonParams: GenerateVideosParameters = {
       model: 'veo-3.1-generate-preview',
       prompt: prompt,
+      ...imageBuffer ? {
+        image: {
+          imageBytes: imageBuffer.toString('base64'),
+          mimeType: 'image/png',
+        },
+      } : {},
       config: { 
         aspectRatio: '9:16',
         durationSeconds: durationSeconds,
-        ...imageBuffer ? {
-          referenceImages: [{
-            image: {
-              imageBytes: imageBuffer.toString('base64'),
-              mimeType: 'image/png',
-            },
-          }],
-        } : {},
       }
     };
 

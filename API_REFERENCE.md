@@ -371,6 +371,44 @@ curl -X GET http://localhost:3333/v1/organizations/cm4.../videos \
 
 ---
 
+### Get Organization Voices
+Returns a list of all available voices for the organization, including public voices.
+
+**Requires Authentication**
+
+<span class="method get">GET</span> `/v1/organizations/:id/voices`
+
+#### Example Request
+
+```bash
+curl -X GET http://localhost:3333/v1/organizations/cm4.../voices \
+  -H "Authorization: Bearer <your_token>"
+```
+
+#### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "voices": [
+      {
+        "id": "cm4...",
+        "elevenlabs_voice_id": "5vkxOzoz40FrElmLP4P7",
+        "name": "Gaby",
+        "preview_url": "https://...",
+        "organization_id": null,
+        "created_at": "2023-10-27T10:00:00.000Z",
+        "updated_at": "2023-10-27T10:00:00.000Z"
+      }
+    ]
+  },
+  "message": "Voices fetched successfully"
+}
+```
+
+---
+
 
 ## Scripts
 
@@ -489,11 +527,21 @@ Triggers AI video generation for a block (requires uploaded image).
 
 <span class="method post">POST</span> `/v1/blocks/:id/generate`
 
+#### Parameters
+
+| Name | Type | Description |
+| :--- | :--- | :--- |
+| `voice_id` | string | **Optional**. The Database ID of the voice to use for audio transformation. |
+
 #### Example Request
 
 ```bash
 curl -X POST http://localhost:3333/v1/blocks/cm4.../generate \
-  -H "Authorization: Bearer <your_token>"
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "voice_id": "cm4..."
+  }'
 ```
 
 #### Response
