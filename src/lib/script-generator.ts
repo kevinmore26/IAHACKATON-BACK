@@ -34,44 +34,45 @@ export class GoogleScriptGenerator implements IScriptGenerator {
 
   async generateScript(intent: string, userScript: string): Promise<{ blocks: Block[] }> {
     const prompt = `
-      You are an expert TikTok video director. Your goal is to create a viral, organic video script based on the user's input.
+      Eres un experto director de videos de TikTok. Tu objetivo es crear un guion de video viral y orgánico basado en la entrada del usuario.
       
-      Intent: ${intent}
-      User's Draft/Idea: "${userScript}"
+      Intención: ${intent}
+      Borrador/Idea del Usuario: "${userScript}"
 
-      Create a video plan with a list of "blocks" (scenes).
-      The video must be under 20 seconds total.
+      Crea un plan de video con una lista de "bloques" (escenas).
+      El video debe durar menos de 20 segundos en total.
       
-      Block Types:
-      - NARRATOR: The user talking to the camera (Talking Head).
-      - SHOWCASE: B-roll of the product or subject with voiceover.
+      Tipos de Bloque:
+      - NARRATOR: El usuario hablando a la cámara (Talking Head).
+      - SHOWCASE: B-roll del producto o sujeto con voz en off.
 
-      Constraints:
-      - Each block MUST have a duration of exactly 4, 6, or 8 seconds.
-      - Total duration of all blocks must not exceed 20 seconds.
+      Restricciones:
+      - Cada bloque DEBE tener una duración de exactamente 4, 6 u 8 segundos.
+      - La duración total de todos los bloques no debe exceder los 20 segundos.
+      - El guion y las instrucciones deben estar en ESPAÑOL.
 
-      Structure:
-      1. Hook (Narrator) - Grab attention immediately.
-      2. Body (Showcase/Evidence) - Demonstrate value or tell the story.
-      3. Call to Action (Narrator) - Tell them what to do.
+      Estructura:
+      1. Gancho (Narrator) - Captar la atención inmediatamente.
+      2. Cuerpo (Showcase/Evidence) - Demostrar valor o contar la historia.
+      3. Llamada a la Acción (Narrator) - Decirles qué hacer.
 
-      IMPORTANT: Return a JSON object with a single key "blocks" containing the array of objects.
-      Do NOT return the blocks as stringified JSON strings. Return them as actual JSON objects.
+      IMPORTANTE: Devuelve un objeto JSON con una única clave "blocks" que contenga el array de objetos.
+      NO devuelvas los bloques como cadenas JSON stringified. Devuélvelos como objetos JSON reales.
       
-      Example Output:
+      Ejemplo de Salida:
       {
         "blocks": [
           {
             "type": "NARRATOR",
             "durationTarget": 6,
-            "script": "Hey, check this out!",
-            "userInstructions": "Smile at the camera."
+            "script": "¡Hola, mira esto!",
+            "userInstructions": "Sonríe a la cámara con energía."
           },
           {
             "type": "SHOWCASE",
             "durationTarget": 4,
-            "script": "(Voiceover) It is amazing.",
-            "userInstructions": "Show the product spinning."
+            "script": "(Voz en off) Es increíble.",
+            "userInstructions": "Muestra el producto girando."
           }
         ]
       }

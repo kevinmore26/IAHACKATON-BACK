@@ -17,15 +17,15 @@ export async function generateBusinessBrief(
   details: BusinessDetails
 ): Promise<string> {
   const prompt = `
-    Generate a concise and professional business brief for the following organization:
+    Genera un resumen de negocio conciso y profesional para la siguiente organización:
     
-    Name: ${details.name}
-    Business Type: ${details.business_type}
-    Main Product: ${details.main_product}
-    Content Objective: ${details.content_objective}
-    Target Audience: ${details.target_audience}
+    Nombre: ${details.name}
+    Tipo de Negocio: ${details.business_type}
+    Producto Principal: ${details.main_product}
+    Objetivo de Contenido: ${details.content_objective}
+    Público Objetivo: ${details.target_audience}
     
-    The brief should summarize the business's core value proposition and its strategic goals based on the provided information. Keep it under 200 words.
+    El resumen debe sintetizar la propuesta de valor central del negocio y sus objetivos estratégicos basándose en la información proporcionada. Mantenlo por debajo de las 200 palabras y escribe en ESPAÑOL.
   `;
 
   try {
@@ -57,16 +57,17 @@ export async function generateContentIdeas(
   count: number = 5
 ): Promise<Array<{ title: string; script: string }>> {
   const prompt = `
-    Generate ${count} short video content ideas for the following business:
+    Genera ${count} ideas de contenido de video corto para el siguiente negocio:
     
-    Name: ${details.name}
-    Business Type: ${details.business_type}
-    Main Product: ${details.main_product}
-    Content Objective: ${details.content_objective}
-    Target Audience: ${details.target_audience}
-    Business Brief: ${details.business_brief}
+    Nombre: ${details.name}
+    Tipo de Negocio: ${details.business_type}
+    Producto Principal: ${details.main_product}
+    Objetivo de Contenido: ${details.content_objective}
+    Público Objetivo: ${details.target_audience}
+    Resumen del Negocio: ${details.business_brief}
     
-    The content ideas should be concise and engaging, focusing on the business's value proposition and target audience. Each idea should be under 20 seconds.
+    Las ideas de contenido deben ser concisas y atractivas, enfocándose en la propuesta de valor del negocio y el público objetivo. Cada idea debe ser de menos de 20 segundos.
+    El título y el guion deben estar en ESPAÑOL.
   `;
 
   try {
