@@ -79,19 +79,35 @@ export class GoogleScriptGenerator implements IScriptGenerator {
         contents: prompt,
         config: {
           responseMimeType: "application/json",
-          responseSchema: responseSchema,
+          responseSchema: {
+            type: "OBJECT",
+            properties: {
+              blocks: {
+                type: "ARRAY",
+                items: {
+                  type: "OBJECT",
+                  properties: {
+                    type: { type: "STRING", enum: ["NARRATOR", "SHOWCASE"], description: "The type of the block." },
+                    durationTarget: { type: "NUMBER", description: "Target duration in seconds." },
+                    script: { type: "STRING", description: "The exact script/words to be spoken or shown." },
+                    userInstructions: { type: "STRING", description: "Direct instructions for the user on what to film or upload." },
+                  },
+                  required: ["type", "durationTarget", "script", "userInstructions"],
+                },
+              },
+            },
+            required: ["blocks"],
+          },
         },
       });
 
       const responseText = response.text;
-      console.log('Raw AI Response:', responseText);
 
       if (!responseText) {
         throw new Error("Empty response from Google Gen AI");
       }
 
       const result = JSON.parse(responseText);
-      console.log('Parsed JSON keys:', Object.keys(result));
       
       // Validate result against schema (runtime check)
       const parsed = responseSchema.parse(result);
