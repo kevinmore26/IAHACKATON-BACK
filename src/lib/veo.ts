@@ -15,32 +15,24 @@ export async function generateVideo(
     console.log('Starting Veo generation...');
     let operation;
 
-    const commonParams:GenerateVideosParameters = {
+    const commonParams: GenerateVideosParameters = {
       model: 'veo-3.1-generate-preview',
       prompt: prompt,
       config: { 
         aspectRatio: '9:16',
-        durationSeconds: durationSeconds
+        durationSeconds: durationSeconds,
+        ...imageBuffer ? {
+          referenceImages: [{
+            image: {
+              imageBytes: imageBuffer.toString('base64'),
+              mimeType: 'image/png',
+            },
+          }],
+        } : {},
       }
     };
 
-    if (imageBuffer) {
-      // Image-to-Video
-      const imageBase64 = imageBuffer.toString('base64');
-      
-      operation = await ai.models.generateVideos({
-        ...commonParams,
-        image: {
-          imageBytes: imageBase64,
-          mimeType: 'image/png',
-        },
-      });
-    } else {
-      // Text-to-Video
-      operation = await ai.models.generateVideos({
-        ...commonParams,
-      });
-    }
+    operation = await ai.models.generateVideos(commonParams);
 
     console.log('Video generation operation started:', operation.name);
 
