@@ -140,7 +140,8 @@ export async function generateBlockVideo(req: Request, res: Response) {
     const promptParts = [
       block.visual_prompt, // The visual scene description
       block.instructions ? `Action: ${block.instructions}` : null, // User instructions as action
-      block.script ? `Dialogue: "${block.script}"` : null // Spoken script as dialogue
+      block.script ? `Dialogue: "${block.script}"` : null, // Spoken script as dialogue
+      "Do not include any text, captions, or subtitles in the generated video."
     ].filter(Boolean);
 
     const promptToUse = promptParts.join('\n');
