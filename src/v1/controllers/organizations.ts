@@ -151,3 +151,143 @@ export async function getUserOrganizations(req: AuthRequest, res: Response) {
     });
   }
 }
+
+import { generateContentIdeas } from '../../lib/ai';
+
+export async function generateIdeas(req: AuthRequest, res: Response) {
+  try {
+    const { id } = req.params;
+    const { count = 5 } = req.body;
+
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not authenticated',
+      });
+    }
+
+    // Check if user belongs to organization
+    const userOrg = await prisma.user_organizations.findUnique({
+      where: {
+        user_id_organization_id: {
+          user_id: req.user.id,
+          organization_id: id,
+        },
+      },
+      include: {
+        organization: true,
+      },
+    });
+
+    if (!userOrg) {
+      return res.status(403).json({
+        success: false,
+        message: 'User does not belong to this organization',
+      });
+    }
+
+    const org = userOrg.organization;
+
+    // Generate ideas using AI
+    const ideas = await generateContentIdeas(
+      {
+        name: org.name,
+        business_type: org.business_type || '',
+        main_product: org.main_product || '',
+        content_objective: org.content_objective || '',
+        target_audience: org.target_audience || '',
+      },
+      count
+    );
+
+    // Save ideas to DB
+    if (ideas.length > 0) {
+      await prisma.content_ideas.createMany({
+        data: ideas.map((idea) => ({
+          organization_id: id,
+          title: idea.title,
+          script: idea.script,
+        })),
+      });
+    }
+
+    // Fetch created ideas (to get IDs)
+    const createdIdeas = await prisma.content_ideas.findMany({
+      where: {
+        organization_id: id,
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
+      take: count,
+    });
+
+    return res.status(201).json({
+      success: true,
+      data: {
+        ideas: createdIdeas,
+      },
+      message: 'Content ideas generated successfully',
+    });
+  } catch (error) {
+    console.error('Error in generateIdeas:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+}
+
+export async function getHome(req: AuthRequest, res: Response) {
+  try {
+    const { id } = req.params;
+
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not authenticated',
+      });
+    }
+
+    // Check if user belongs to organization
+    const userOrg = await prisma.user_organizations.findUnique({
+      where: {
+        user_id_organization_id: {
+          user_id: req.user.id,
+          organization_id: id,
+        },
+      },
+    });
+
+    if (!userOrg) {
+      return res.status(403).json({
+        success: false,
+        message: 'User does not belong to this organization',
+      });
+    }
+
+    const ideas = await prisma.content_ideas.findMany({
+      where: {
+        organization_id: id,
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
+      take: 10,
+    });
+
+    return res.json({
+      success: true,
+      data: {
+        ideas,
+      },
+      message: 'Home data fetched successfully',
+    });
+  } catch (error) {
+    console.error('Error in getHome:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+}

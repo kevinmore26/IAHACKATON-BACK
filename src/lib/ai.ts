@@ -1,6 +1,9 @@
 import { GoogleGenAI } from '@google/genai';
 import { env } from '../env';
 
+import { z } from 'zod';
+import { zodToJsonSchema } from 'zod-to-json-schema';
+
 const ai = new GoogleGenAI({ apiKey: env.GOOGLE_API_KEY });
 
 interface BusinessDetails {
@@ -36,5 +39,51 @@ export async function generateBusinessBrief(
   } catch (error) {
     console.error('Error generating business brief:', error);
     return 'Failed to generate business brief.';
+  }
+}
+
+const contentIdeasSchema = z.object({
+  ideas: z.array(
+    z.object({
+      title: z.string().describe('A catchy title for the video.'),
+      script: z
+        .string()
+        .describe('A short video script (approx. 10-23 seconds).'),
+    })
+  ),
+});
+
+export async function generateContentIdeas(
+  details: BusinessDetails,
+  count: number = 5
+): Promise<Array<{ title: string; script: string }>> {
+  const prompt = `
+    Generate ${count} short video content ideas for the following business:
+    
+    Name: ${details.name}
+    Business Type: ${details.business_type}
+    Main Product: ${details.main_product}
+    Content Objective: ${details.content_objective}
+    Target Audience: ${details.target_audience}
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json',
+        responseJsonSchema: zodToJsonSchema(contentIdeasSchema),
+      },
+    });
+
+    const text = response.text;
+    if (!text) return [];
+
+    const parsed = contentIdeasSchema.parse(JSON.parse(text));
+    return parsed.ideas;
+  } catch (error) {
+    console.error('Error generating content ideas:', error);
+    return [];
   }
 }

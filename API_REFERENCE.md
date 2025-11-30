@@ -235,3 +235,87 @@ curl -X GET http://localhost:3333/v1/organizations \
   "message": "Organizations fetched successfully"
 }
 ```
+
+---
+
+### Generate Content Ideas
+Generates video content ideas (scripts) for an organization using AI.
+
+**Requires Authentication**
+
+<span class="method post">POST</span> `/v1/organizations/:id/generate-ideas`
+
+#### Parameters
+
+| Name | Type | Description |
+| :--- | :--- | :--- |
+| `count` | number | **Optional**. Number of ideas to generate (default: 5). |
+
+#### Example Request
+
+```bash
+curl -X POST http://localhost:3333/v1/organizations/cm4.../generate-ideas \
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "count": 3
+  }'
+```
+
+#### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "ideas": [
+      {
+        "id": "cm4...",
+        "organization_id": "cm4...",
+        "title": "Behind the Scenes",
+        "script": "Start with a shot of the office...",
+        "created_at": "2023-10-27T10:00:00.000Z",
+        "updated_at": "2023-10-27T10:00:00.000Z"
+      }
+    ]
+  },
+  "message": "Content ideas generated successfully"
+}
+```
+
+---
+
+### Get Home Data
+Retrieves the content ideas for the organization's home screen.
+
+**Requires Authentication**
+
+<span class="method get">GET</span> `/v1/organizations/:id/home`
+
+#### Example Request
+
+```bash
+curl -X GET http://localhost:3333/v1/organizations/cm4.../home \
+  -H "Authorization: Bearer <your_token>"
+```
+
+#### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "ideas": [
+      {
+        "id": "cm4...",
+        "organization_id": "cm4...",
+        "title": "Behind the Scenes",
+        "script": "Start with a shot of the office...",
+        "created_at": "2023-10-27T10:00:00.000Z",
+        "updated_at": "2023-10-27T10:00:00.000Z"
+      }
+    ]
+  },
+  "message": "Home data fetched successfully"
+}
+```
