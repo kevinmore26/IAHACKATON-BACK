@@ -46,6 +46,10 @@ export class GoogleScriptGenerator implements IScriptGenerator {
       - NARRATOR: The user talking to the camera (Talking Head).
       - SHOWCASE: B-roll of the product or subject with voiceover.
 
+      Constraints:
+      - Each block MUST have a duration of exactly 4, 6, or 8 seconds.
+      - Total duration of all blocks must not exceed 20 seconds.
+
       Structure:
       1. Hook (Narrator) - Grab attention immediately.
       2. Body (Showcase/Evidence) - Demonstrate value or tell the story.
@@ -59,13 +63,13 @@ export class GoogleScriptGenerator implements IScriptGenerator {
         "blocks": [
           {
             "type": "NARRATOR",
-            "durationTarget": 5,
+            "durationTarget": 6,
             "script": "Hey, check this out!",
             "userInstructions": "Smile at the camera."
           },
           {
             "type": "SHOWCASE",
-            "durationTarget": 3,
+            "durationTarget": 4,
             "script": "(Voiceover) It is amazing.",
             "userInstructions": "Show the product spinning."
           }
@@ -88,7 +92,7 @@ export class GoogleScriptGenerator implements IScriptGenerator {
                   type: "OBJECT",
                   properties: {
                     type: { type: "STRING", enum: ["NARRATOR", "SHOWCASE"], description: "The type of the block." },
-                    durationTarget: { type: "NUMBER", description: "Target duration in seconds." },
+                    durationTarget: { type: "NUMBER", enum: [4, 6, 8], description: "Target duration in seconds (must be 4, 6, or 8)." },
                     script: { type: "STRING", description: "The exact script/words to be spoken or shown." },
                     userInstructions: { type: "STRING", description: "Direct instructions for the user on what to film or upload." },
                   },
