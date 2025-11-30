@@ -10,16 +10,17 @@ export const supabase = createClient(
   env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-const BUCKET_NAME = 'video-assets';
+const DEFAULT_BUCKET = 'video-assets';
 
 export async function uploadFile(
   path: string,
   fileBody: Buffer | ArrayBuffer | Blob | string,
-  contentType?: string
+  contentType?: string,
+  bucketName: string = DEFAULT_BUCKET
 ): Promise<string | null> {
   try {
     const { data, error } = await supabase.storage
-      .from(BUCKET_NAME)
+      .from(bucketName)
       .upload(path, fileBody, {
         contentType,
         upsert: true,
@@ -37,10 +38,15 @@ export async function uploadFile(
   }
 }
 
-export async function getSignedUrl(path: string): Promise<string | null> {
+export function getPublicUrl(path: string, bucketName: string = DEFAULT_BUCKET): string {
+  const { data } = supabase.storage.from(bucketName).getPublicUrl(path);
+  return data.publicUrl;
+}
+
+export async function getSignedUrl(path: string, bucketName: string = DEFAULT_BUCKET): Promise<string | null> {
   try {
     const { data, error } = await supabase.storage
-      .from(BUCKET_NAME)
+      .from(bucketName)
       .createSignedUrl(path, 60 * 60); // 1 hour expiry
 
     if (error) {
@@ -55,10 +61,10 @@ export async function getSignedUrl(path: string): Promise<string | null> {
   }
 }
 
-export async function downloadFile(path: string): Promise<Buffer | null> {
+export async function downloadFile(path: string, bucketName: string = DEFAULT_BUCKET): Promise<Buffer | null> {
   try {
     const { data, error } = await supabase.storage
-      .from(BUCKET_NAME)
+      .from(bucketName)
       .download(path);
 
     if (error) {
