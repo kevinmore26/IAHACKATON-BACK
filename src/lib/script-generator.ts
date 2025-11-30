@@ -16,7 +16,7 @@ export interface IScriptGenerator {
 // Define the schema for the output
 const blockSchema = z.object({
   type: z.enum(["NARRATOR", "SHOWCASE"]).describe("The type of the block."),
-  durationTarget: z.number().describe("Target duration in seconds."),
+  durationTarget: z.coerce.number().describe("Target duration in seconds."),
   script: z.string().describe("The exact script/words to be spoken or shown."),
   userInstructions: z.string().describe("Direct instructions for the user on what to film or upload."),
 });
@@ -64,13 +64,13 @@ export class GoogleScriptGenerator implements IScriptGenerator {
         "blocks": [
           {
             "type": "NARRATOR",
-            "durationTarget": 6,
+            "durationTarget": "6",
             "script": "¡Hola, mira esto!",
             "userInstructions": "Sonríe a la cámara con energía."
           },
           {
             "type": "SHOWCASE",
-            "durationTarget": 4,
+            "durationTarget": "4",
             "script": "(Voz en off) Es increíble.",
             "userInstructions": "Muestra el producto girando."
           }
@@ -93,7 +93,7 @@ export class GoogleScriptGenerator implements IScriptGenerator {
                   type: "OBJECT",
                   properties: {
                     type: { type: "STRING", enum: ["NARRATOR", "SHOWCASE"], description: "The type of the block." },
-                    durationTarget: { type: "NUMBER", enum: [4, 6, 8], description: "Target duration in seconds (must be 4, 6, or 8)." },
+                    durationTarget: { type: "STRING", enum: ["4", "6", "8"], description: "Target duration in seconds (must be 4, 6, or 8)." },
                     script: { type: "STRING", description: "The exact script/words to be spoken or shown." },
                     userInstructions: { type: "STRING", description: "Direct instructions for the user on what to film or upload." },
                   },
