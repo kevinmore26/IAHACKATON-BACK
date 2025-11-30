@@ -2,7 +2,6 @@ import { GoogleGenAI } from '@google/genai';
 import { env } from '../env';
 
 import { z } from 'zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
 
 const ai = new GoogleGenAI({ apiKey: env.GOOGLE_API_KEY });
 
@@ -73,7 +72,7 @@ export async function generateContentIdeas(
       contents: prompt,
       config: {
         responseMimeType: 'application/json',
-        responseJsonSchema: zodToJsonSchema(contentIdeasSchema),
+        responseJsonSchema: contentIdeasSchema,
       },
     });
 
