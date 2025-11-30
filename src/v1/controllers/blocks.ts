@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import prisma from '../../lib/prisma';
-import { downloadFile, uploadFile } from '../../lib/supabase';
+import { downloadFile, uploadFile, getSignedUrl } from '../../lib/supabase';
 // import { downloadFile } from '../../lib/supabase';
 // import { generateVideo } from '../../lib/veo';
 import fs from 'fs';
@@ -64,9 +64,15 @@ export async function uploadBlockMedia(req: MulterRequest, res: Response) {
       },
     });
 
+    // Generate signed URL
+    const signedUrl = await getSignedUrl(uploadedPath);
+
     return res.json({
       success: true,
-      data: updatedBlock,
+      data: {
+        ...updatedBlock,
+        signed_url: signedUrl,
+      },
       message: 'Media uploaded successfully',
     });
 
@@ -157,9 +163,15 @@ export async function generateBlockVideo(req: Request, res: Response) {
       },
     });
 
+    // Generate signed URL
+    const signedUrl = await getSignedUrl(finalBlock.generated_video_path!);
+
     return res.json({
       success: true,
-      data: finalBlock,
+      data: {
+        ...finalBlock,
+        signed_url: signedUrl,
+      },
       message: 'Video generated successfully',
     });
 

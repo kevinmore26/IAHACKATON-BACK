@@ -423,9 +423,19 @@ curl -X POST http://localhost:3333/v1/blocks/cm4.../upload \
   "success": true,
   "data": {
     "id": "cm4...",
-    "input_media_path": "inputs/cm4....png",
+    "content_idea_id": "cm4...",
+    "type": "NARRATOR",
+    "script": "Hey, check this out!",
+    "instructions": "Smile at the camera.",
+    "duration_target": 6,
+    "order": 1,
     "status": "READY",
-    ...
+    "input_media_path": "inputs/cm4....png",
+    "input_media_type": "IMAGE",
+    "generated_video_path": null,
+    "created_at": "2023-10-27T10:00:00.000Z",
+    "updated_at": "2023-10-27T10:05:00.000Z",
+    "signed_url": "https://supabase...."
   },
   "message": "Media uploaded successfully"
 }
@@ -452,9 +462,19 @@ curl -X POST http://localhost:3333/v1/blocks/cm4.../generate \
   "success": true,
   "data": {
     "id": "cm4...",
-    "generated_video_path": "generated/cm4....mp4",
+    "content_idea_id": "cm4...",
+    "type": "NARRATOR",
+    "script": "Hey, check this out!",
+    "instructions": "Smile at the camera.",
+    "duration_target": 6,
+    "order": 1,
     "status": "COMPLETED",
-    ...
+    "input_media_path": "inputs/cm4....png",
+    "input_media_type": "IMAGE",
+    "generated_video_path": "generated/cm4....mp4",
+    "created_at": "2023-10-27T10:00:00.000Z",
+    "updated_at": "2023-10-27T10:10:00.000Z",
+    "signed_url": "https://supabase...."
   },
   "message": "Video generated successfully"
 }
@@ -483,9 +503,14 @@ curl -X POST http://localhost:3333/v1/scripts/cm4.../render \
   "success": true,
   "data": {
     "id": "cm4...",
-    "final_video_path": "renders/cm4....mp4",
+    "organization_id": "cm4...",
+    "title": "Behind the Scenes",
+    "script": "Start with a shot of the office...",
     "status": "COMPLETED",
-    ...
+    "final_video_path": "renders/cm4....mp4",
+    "created_at": "2023-10-27T10:00:00.000Z",
+    "updated_at": "2023-10-27T10:15:00.000Z",
+    "signed_url": "https://supabase...."
   },
   "message": "Video rendered successfully"
 }

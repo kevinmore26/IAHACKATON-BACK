@@ -93,7 +93,7 @@ export async function generateScript(req: Request, res: Response) {
 }
 
 import { stitchVideos } from '../../lib/video-processor';
-import { downloadFile, uploadFile } from '../../lib/supabase';
+import { downloadFile, uploadFile, getSignedUrl } from '../../lib/supabase';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
@@ -186,9 +186,15 @@ export async function renderScriptVideo(req: Request, res: Response) {
     // Cleanup
     fs.rmSync(tempDir, { recursive: true, force: true });
 
+    // Generate signed URL
+    const signedUrl = await getSignedUrl(uploadedPath);
+
     return res.json({
       success: true,
-      data: updatedIdea,
+      data: {
+        ...updatedIdea,
+        signed_url: signedUrl,
+      },
       message: 'Video rendered successfully',
     });
 
