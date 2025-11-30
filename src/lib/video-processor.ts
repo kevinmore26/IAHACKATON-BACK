@@ -126,14 +126,18 @@ export async function createSubtitleFile(alignment: AlignmentData, outputPath: s
     let wordStart = -1;
 
     for (let i = 0; i < alignment.characters.length; i++) {
-        const char = alignment.characters[i];
-        const start = alignment.character_start_times_seconds[i];
+        const charObj = alignment.characters[i];
+        const char = charObj.text;
+        const start = charObj.start;
 
         if (wordStart === -1) wordStart = start;
 
         if (char === ' ') {
             if (currentWord) {
-                words.push({ text: currentWord, start: wordStart, end: alignment.character_end_times_seconds[i-1] });
+                // Use the end time of the previous character (which was the last char of the word)
+                // We need to be careful with index 0, but if currentWord is not empty, i > 0
+                const prevCharObj = alignment.characters[i-1];
+                words.push({ text: currentWord, start: wordStart, end: prevCharObj.end });
                 currentWord = '';
                 wordStart = -1;
             }
@@ -142,7 +146,8 @@ export async function createSubtitleFile(alignment: AlignmentData, outputPath: s
         }
     }
     if (currentWord) {
-        words.push({ text: currentWord, start: wordStart, end: alignment.character_end_times_seconds[alignment.characters.length - 1] });
+        const lastCharObj = alignment.characters[alignment.characters.length - 1];
+        words.push({ text: currentWord, start: wordStart, end: lastCharObj.end });
     }
 
     // Group words into caption segments (TikTok style: 1-3 words)

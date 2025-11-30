@@ -136,9 +136,11 @@ export async function generateAudio(text: string, voiceId: string): Promise<Buff
 }
 
 export interface AlignmentData {
-  characters: string[];
-  character_start_times_seconds: number[];
-  character_end_times_seconds: number[];
+  characters: Array<{
+    text: string;
+    start: number;
+    end: number;
+  }>;
 }
 
 export async function alignAudio(audioBuffer: Buffer, text: string): Promise<AlignmentData> {
