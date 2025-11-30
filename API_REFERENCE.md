@@ -29,6 +29,18 @@ Creates a new user account.
 | `email` | string | **Required**. The email address of the user. |
 | `password` | string | **Required**. The password for the account. |
 
+#### Example Request
+
+```bash
+curl -X POST http://localhost:3333/v1/auth/signup \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "John Doe",
+    "email": "john@example.com",
+    "password": "securepassword"
+  }'
+```
+
 #### Response
 
 ```json
@@ -62,6 +74,17 @@ Authenticates a user and returns a JWT token.
 | `email` | string | **Required**. The email address of the user. |
 | `password` | string | **Required**. The password for the account. |
 
+#### Example Request
+
+```bash
+curl -X POST http://localhost:3333/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "john@example.com",
+    "password": "securepassword"
+  }'
+```
+
 #### Response
 
 ```json
@@ -87,6 +110,13 @@ Authenticates a user and returns a JWT token.
 Retrieves the details of the currently authenticated user.
 
 <span class="method get">GET</span> `/v1/auth/me`
+
+#### Example Request
+
+```bash
+curl -X GET http://localhost:3333/v1/auth/me \
+  -H "Authorization: Bearer <your_token>"
+```
 
 #### Response
 
@@ -133,6 +163,21 @@ Creates a new organization. This endpoint generates a business brief using AI ba
 | `content_objective` | string | **Required**. The objective of the content (e.g., "Ventas"). |
 | `target_audience` | string | **Required**. The target audience description. |
 
+#### Example Request
+
+```bash
+curl -X POST http://localhost:3333/v1/organizations \
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Acme Corp",
+    "business_type": "Technology",
+    "main_product": "SaaS Platform",
+    "content_objective": "Awareness",
+    "target_audience": "Startups"
+  }'
+```
+
 #### Response
 
 ```json
@@ -162,6 +207,13 @@ Creates a new organization. This endpoint generates a business brief using AI ba
 Returns a list of organizations that the current user belongs to.
 
 <span class="method get">GET</span> `/v1/organizations`
+
+#### Example Request
+
+```bash
+curl -X GET http://localhost:3333/v1/organizations \
+  -H "Authorization: Bearer <your_token>"
+```
 
 #### Response
 
