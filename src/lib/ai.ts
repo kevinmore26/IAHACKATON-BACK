@@ -75,7 +75,23 @@ export async function generateContentIdeas(
       contents: prompt,
       config: {
         responseMimeType: 'application/json',
-        responseJsonSchema: contentIdeasSchema,
+        responseSchema: {
+          type: 'OBJECT',
+          properties: {
+            ideas: {
+              type: 'ARRAY',
+              items: {
+                type: 'OBJECT',
+                properties: {
+                  title: { type: 'STRING', description: 'A catchy title for the video.' },
+                  script: { type: 'STRING', description: 'A short video script (approx. 10-20 seconds).' },
+                },
+                required: ['title', 'script'],
+              },
+            },
+          },
+          required: ['ideas'],
+        },
       },
     });
 
