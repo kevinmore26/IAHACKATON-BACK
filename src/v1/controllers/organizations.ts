@@ -157,7 +157,7 @@ import { generateContentIdeas } from '../../lib/ai';
 export async function generateIdeas(req: AuthRequest, res: Response) {
   try {
     const { id } = req.params;
-    const { count = 5 } = req.body;
+    const { count = 7 } = req.body;
 
     if (!req.user) {
       return res.status(401).json({
