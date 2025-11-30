@@ -391,3 +391,102 @@ curl -X POST http://localhost:3333/v1/scripts/generate \
   "message": "Script generated successfully"
 }
 ```
+
+---
+
+## Blocks
+
+### Upload Media
+Uploads media (image or video) for a specific block.
+
+<span class="method post">POST</span> `/v1/blocks/:id/upload`
+
+#### Parameters
+
+| Name | Type | Description |
+| :--- | :--- | :--- |
+| `file` | file | **Required**. Image or Video file. |
+
+#### Example Request
+
+```bash
+curl -X POST http://localhost:3333/v1/blocks/cm4.../upload \
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: multipart/form-data" \
+  -F "file=@/path/to/image.png"
+```
+
+#### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "cm4...",
+    "input_media_path": "inputs/cm4....png",
+    "status": "READY",
+    ...
+  },
+  "message": "Media uploaded successfully"
+}
+```
+
+---
+
+### Generate Video
+Triggers AI video generation for a block (requires uploaded image).
+
+<span class="method post">POST</span> `/v1/blocks/:id/generate`
+
+#### Example Request
+
+```bash
+curl -X POST http://localhost:3333/v1/blocks/cm4.../generate \
+  -H "Authorization: Bearer <your_token>"
+```
+
+#### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "cm4...",
+    "generated_video_path": "generated/cm4....mp4",
+    "status": "COMPLETED",
+    ...
+  },
+  "message": "Video generated successfully"
+}
+```
+
+---
+
+## Scripts (Render)
+
+### Render Final Video
+Stitches all block videos into a final movie.
+
+<span class="method post">POST</span> `/v1/scripts/:id/render`
+
+#### Example Request
+
+```bash
+curl -X POST http://localhost:3333/v1/scripts/cm4.../render \
+  -H "Authorization: Bearer <your_token>"
+```
+
+#### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "cm4...",
+    "final_video_path": "renders/cm4....mp4",
+    "status": "COMPLETED",
+    ...
+  },
+  "message": "Video rendered successfully"
+}
+```

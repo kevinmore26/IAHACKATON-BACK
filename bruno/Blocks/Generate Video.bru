@@ -1,0 +1,19 @@
+meta {
+  name: Generate Video
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/blocks/:id/generate
+  body: none
+  auth: bearer
+}
+
+params:path {
+  id: <BLOCK_ID>
+}
+
+auth:bearer {
+  token: {{token}}
+}

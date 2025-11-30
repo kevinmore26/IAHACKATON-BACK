@@ -1,0 +1,19 @@
+meta {
+  name: Render Final Video
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/scripts/:id/render
+  body: none
+  auth: bearer
+}
+
+params:path {
+  id: {{ideaId}}
+}
+
+auth:bearer {
+  token: {{token}}
+}
