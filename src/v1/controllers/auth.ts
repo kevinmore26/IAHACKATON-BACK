@@ -137,14 +137,38 @@ export async function getMe(req: AuthRequest, res: Response) {
       });
     }
 
+    const userWithOrgs = await prisma.users.findUnique({
+      where: { id: req.user.id },
+      include: {
+        memberships: {
+          include: {
+            organization: true,
+          },
+        },
+      },
+    });
+
+    if (!userWithOrgs) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
+    }
+
     return res.json({
       success: true,
       data: {
-        id: req.user.id,
-        name: req.user.name,
-        email: req.user.email,
-        created_at: req.user.created_at,
-        updated_at: req.user.updated_at,
+        id: userWithOrgs.id,
+        name: userWithOrgs.name,
+        email: userWithOrgs.email,
+        created_at: userWithOrgs.created_at,
+        updated_at: userWithOrgs.updated_at,
+        organizations: userWithOrgs.memberships.map((m) => ({
+          id: m.organization.id,
+          name: m.organization.name,
+          slug: m.organization.slug,
+          role: m.role,
+        })),
       },
       message: 'User data fetched successfully',
     });
