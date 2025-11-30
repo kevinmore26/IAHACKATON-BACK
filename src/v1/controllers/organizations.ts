@@ -292,3 +292,77 @@ export async function getHome(req: AuthRequest, res: Response) {
     });
   }
 }
+
+import { getSignedUrl } from '../../lib/supabase';
+
+export async function getOrganizationVideos(req: AuthRequest, res: Response) {
+  try {
+    const { id } = req.params;
+
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not authenticated',
+      });
+    }
+
+    // Check if user belongs to organization
+    const userOrg = await prisma.user_organizations.findUnique({
+      where: {
+        user_id_organization_id: {
+          user_id: req.user.id,
+          organization_id: id,
+        },
+      },
+    });
+
+    if (!userOrg) {
+      return res.status(403).json({
+        success: false,
+        message: 'User does not belong to this organization',
+      });
+    }
+
+    // Fetch last 20 content ideas with final videos
+    const videos = await prisma.content_ideas.findMany({
+      where: {
+        organization_id: id,
+        final_video_path: {
+          not: null,
+        },
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
+      take: 20,
+    });
+
+    // Generate signed URLs in parallel
+    const videosWithUrls = await Promise.all(
+      videos.map(async (video) => {
+        const signedUrl = video.final_video_path
+          ? await getSignedUrl(video.final_video_path)
+          : null;
+
+        return {
+          ...video,
+          signed_url: signedUrl,
+        };
+      })
+    );
+
+    return res.json({
+      success: true,
+      data: {
+        videos: videosWithUrls,
+      },
+      message: 'Videos fetched successfully',
+    });
+  } catch (error) {
+    console.error('Error in getOrganizationVideos:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+}
