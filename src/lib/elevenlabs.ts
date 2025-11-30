@@ -144,11 +144,11 @@ export interface AlignmentData {
 export async function alignAudio(audioBuffer: Buffer, text: string): Promise<AlignmentData> {
   try {
     const formData = new FormData();
-    formData.append('audio', audioBuffer, { filename: 'audio.mp3', contentType: 'audio/mpeg' });
+    formData.append('file', audioBuffer, { filename: 'audio.mp3', contentType: 'audio/mpeg' });
     formData.append('text', text);
 
     const response = await axios.post(
-      `${BASE_URL}/speech-to-text/alignment`,
+      `${BASE_URL}/forced-alignment`,
       formData,
       {
         headers: {
@@ -174,6 +174,9 @@ export async function alignAudio(audioBuffer: Buffer, text: string): Promise<Ali
     }
 
     console.error('Error aligning audio with ElevenLabs:', errorMessage);
+    if (error.response?.data) {
+        console.error('Full error details:', JSON.stringify(error.response.data, null, 2));
+    }
     throw new Error(errorMessage);
   }
 }

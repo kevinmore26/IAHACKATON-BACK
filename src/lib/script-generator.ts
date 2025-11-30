@@ -1,6 +1,5 @@
-import { GoogleGenAI } from "@google/genai";
+import { withGoogleAIRetry } from "./google-client";
 import { z } from "zod";
-import { env } from "../env";
 
 export interface Block {
   type: "NARRATOR" | "SHOWCASE";
@@ -28,11 +27,8 @@ const responseSchema = z.object({
 });
 
 export class GoogleScriptGenerator implements IScriptGenerator {
-  private client: GoogleGenAI;
-
-  constructor() {
-    this.client = new GoogleGenAI({ apiKey: env.GOOGLE_API_KEY });
-  }
+  
+  constructor() {}
 
   async generateScript(intent: string, userScript: string): Promise<{ blocks: Block[] }> {
     const prompt = `
@@ -98,52 +94,54 @@ export class GoogleScriptGenerator implements IScriptGenerator {
       }
     `;
 
-    try {
-      const response = await this.client.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: prompt,
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: "OBJECT",
-            properties: {
-              blocks: {
-                type: "ARRAY",
-                items: {
-                  type: "OBJECT",
-                  properties: {
-                    type: { type: "STRING", enum: ["NARRATOR", "SHOWCASE"], description: "The type of the block." },
-                    durationTarget: { type: "STRING", enum: ["4", "6", "8"], description: "Target duration in seconds (must be 4, 6, or 8)." },
-                    script: { type: "STRING", description: "The exact script/words to be spoken or shown." },
-                    visualPrompt: { type: "STRING", description: "A detailed visual prompt for video generation using the formula: [Cinematography] + [Subject] + [Action] + [Context] + [Style & Ambiance]. Must describe a realistic video filmed from a cellphone." },
-                    userInstructions: { type: "STRING", description: "Direct instructions for the user on what to film or upload." },
+    return withGoogleAIRetry(async (client) => {
+      try {
+        const response = await client.models.generateContent({
+          model: "gemini-2.5-flash",
+          contents: prompt,
+          config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+              type: "OBJECT",
+              properties: {
+                blocks: {
+                  type: "ARRAY",
+                  items: {
+                    type: "OBJECT",
+                    properties: {
+                      type: { type: "STRING", enum: ["NARRATOR", "SHOWCASE"], description: "The type of the block." },
+                      durationTarget: { type: "STRING", enum: ["4", "6", "8"], description: "Target duration in seconds (must be 4, 6, or 8)." },
+                      script: { type: "STRING", description: "The exact script/words to be spoken or shown." },
+                      visualPrompt: { type: "STRING", description: "A detailed visual prompt for video generation using the formula: [Cinematography] + [Subject] + [Action] + [Context] + [Style & Ambiance]. Must describe a realistic video filmed from a cellphone." },
+                      userInstructions: { type: "STRING", description: "Direct instructions for the user on what to film or upload." },
+                    },
+                    required: ["type", "durationTarget", "script", "visualPrompt", "userInstructions"],
                   },
-                  required: ["type", "durationTarget", "script", "visualPrompt", "userInstructions"],
                 },
               },
+              required: ["blocks"],
             },
-            required: ["blocks"],
           },
-        },
-      });
+        });
 
-      const responseText = response.text;
+        const responseText = response.text;
 
-      if (!responseText) {
-        throw new Error("Empty response from Google Gen AI");
+        if (!responseText) {
+          throw new Error("Empty response from Google Gen AI");
+        }
+
+        const result = JSON.parse(responseText);
+        
+        // Validate result against schema (runtime check)
+        const parsed = responseSchema.parse(result);
+
+        // Cast to Block[] since Zod enum matches our type
+        return { blocks: parsed.blocks };
+
+      } catch (e) {
+        console.error('Failed to generate script with Google Gen AI:', e);
+        throw e;
       }
-
-      const result = JSON.parse(responseText);
-      
-      // Validate result against schema (runtime check)
-      const parsed = responseSchema.parse(result);
-
-      // Cast to Block[] since Zod enum matches our type
-      return { blocks: parsed.blocks };
-
-    } catch (e) {
-      console.error('Failed to generate script with Google Gen AI:', e);
-      throw new Error('Failed to generate script');
-    }
+    });
   }
 }

@@ -233,6 +233,7 @@ export async function generateBlockVideo(req: Request, res: Response) {
              const audioBuffer = fs.readFileSync(tempAudioForAlignment);
              
              // Align
+             console.log(`Calling alignAudio with script: "${block.script}"`);
              const alignment = await alignAudio(audioBuffer, block.script);
              
              // Create Subtitles
@@ -260,6 +261,7 @@ export async function generateBlockVideo(req: Request, res: Response) {
             console.error('Error adding captions:', error);
             // Don't fail the whole process, just log it. 
             // The video will be without captions but still usable.
+            console.log('Continuing without captions...');
         }
     }
 

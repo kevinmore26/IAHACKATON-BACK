@@ -1,9 +1,5 @@
-import { GoogleGenAI } from '@google/genai';
-import { env } from '../env';
-
+import { withGoogleAIRetry } from './google-client';
 import { z } from 'zod';
-
-const ai = new GoogleGenAI({ apiKey: env.GOOGLE_API_KEY });
 
 interface BusinessDetails {
   name: string;
@@ -28,17 +24,19 @@ export async function generateBusinessBrief(
     El resumen debe sintetizar la propuesta de valor central del negocio y sus objetivos estratégicos basándose en la información proporcionada. Mantenlo por debajo de las 200 palabras y escribe en ESPAÑOL.
   `;
 
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-    });
+  return withGoogleAIRetry(async (ai) => {
+    try {
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+      });
 
-    return response.text || 'No brief generated.';
-  } catch (error) {
-    console.error('Error generating business brief:', error);
-    return 'Failed to generate business brief.';
-  }
+      return response.text || 'No brief generated.';
+    } catch (error) {
+      console.error('Error generating business brief:', error);
+      throw error;
+    }
+  });
 }
 
 const contentIdeasSchema = z.object({
@@ -70,39 +68,41 @@ export async function generateContentIdeas(
     El título y el guion deben estar en ESPAÑOL.
   `;
 
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-      config: {
-        responseMimeType: 'application/json',
-        responseSchema: {
-          type: 'OBJECT',
-          properties: {
-            ideas: {
-              type: 'ARRAY',
-              items: {
-                type: 'OBJECT',
-                properties: {
-                  title: { type: 'STRING', description: 'A catchy title for the video.' },
-                  script: { type: 'STRING', description: 'A short video script (approx. 10-20 seconds).' },
+  return withGoogleAIRetry(async (ai) => {
+    try {
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+          responseMimeType: 'application/json',
+          responseSchema: {
+            type: 'OBJECT',
+            properties: {
+              ideas: {
+                type: 'ARRAY',
+                items: {
+                  type: 'OBJECT',
+                  properties: {
+                    title: { type: 'STRING', description: 'A catchy title for the video.' },
+                    script: { type: 'STRING', description: 'A short video script (approx. 10-20 seconds).' },
+                  },
+                  required: ['title', 'script'],
                 },
-                required: ['title', 'script'],
               },
             },
+            required: ['ideas'],
           },
-          required: ['ideas'],
         },
-      },
-    });
+      });
 
-    const text = response.text;
-    if (!text) return [];
+      const text = response.text;
+      if (!text) return [];
 
-    const parsed = contentIdeasSchema.parse(JSON.parse(text));
-    return parsed.ideas;
-  } catch (error) {
-    console.error('Error generating content ideas:', error);
-    return [];
-  }
+      const parsed = contentIdeasSchema.parse(JSON.parse(text));
+      return parsed.ideas;
+    } catch (error) {
+      console.error('Error generating content ideas:', error);
+      throw error;
+    }
+  });
 }
