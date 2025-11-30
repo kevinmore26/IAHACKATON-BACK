@@ -726,3 +726,55 @@ curl -X GET http://localhost:3333/v1/organizations/cm4.../gallery \
   "message": "Gallery fetched successfully"
 }
 ```
+
+---
+
+## Voices
+
+### Clone Voice
+Clones a voice using audio samples.
+
+**Requires Authentication**
+
+<span class="method post">POST</span> `/v1/voices/clone`
+
+#### Parameters
+
+| Name | Type | Description |
+| :--- | :--- | :--- |
+| `name` | string | **Required**. The name of the voice to clone. |
+| `audio` | file | **Required**. One or more audio files (mp3) to use for cloning. |
+| `organization_id` | string | **Optional**. The ID of the organization to associate the voice with. |
+
+#### Example Request
+
+```bash
+curl -X POST http://localhost:3333/v1/voices/clone \
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: multipart/form-data" \
+  -F "name=My Cloned Voice" \
+  -F "audio=@/path/to/sample1.mp3" \
+  -F "audio=@/path/to/sample2.mp3" \
+  -F "organization_id=cm4..."
+```
+
+#### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "voice": {
+      "id": "cm4...",
+      "elevenlabs_voice_id": "5vkxOzoz40FrElmLP4P7",
+      "name": "My Cloned Voice",
+      "preview_url": "https://supabase....",
+      "organization_id": "cm4...",
+      "created_at": "2023-10-27T10:00:00.000Z",
+      "updated_at": "2023-10-27T10:00:00.000Z"
+    }
+  },
+  "message": "Voice cloned successfully"
+}
+```
+
