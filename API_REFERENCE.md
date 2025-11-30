@@ -117,7 +117,9 @@ Retrieves the details of the currently authenticated user.
 ## Organizations
 
 ### Create an organization
-Creates a new organization and assigns the current user as an admin.
+Creates a new organization. This endpoint generates a business brief using AI based on the provided details.
+
+**Requires Authentication**
 
 <span class="method post">POST</span> `/v1/organizations`
 
@@ -126,6 +128,10 @@ Creates a new organization and assigns the current user as an admin.
 | Name | Type | Description |
 | :--- | :--- | :--- |
 | `name` | string | **Required**. The name of the organization. |
+| `business_type` | string | **Required**. The type of business (e.g., "Ropa y moda"). |
+| `main_product` | string | **Required**. The main product or service. |
+| `content_objective` | string | **Required**. The objective of the content (e.g., "Ventas"). |
+| `target_audience` | string | **Required**. The target audience description. |
 
 #### Response
 
@@ -137,6 +143,11 @@ Creates a new organization and assigns the current user as an admin.
       "id": "cm4...",
       "name": "Acme Corp",
       "slug": "acme-corp",
+      "business_type": "Technology",
+      "main_product": "SaaS Platform",
+      "content_objective": "Awareness",
+      "target_audience": "Startups",
+      "business_brief": "Acme Corp is a technology company...",
       "created_at": "2023-10-27T10:00:00.000Z",
       "updated_at": "2023-10-27T10:00:00.000Z"
     }

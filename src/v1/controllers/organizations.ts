@@ -10,14 +10,28 @@ function generateSlug(name: string): string {
     .replace(/^-|-$/g, '');
 }
 
+import { generateBusinessBrief } from '../../lib/ai';
+
 export async function createOrganization(req: AuthRequest, res: Response) {
   try {
-    const { name } = req.body;
+    const {
+      name,
+      business_type,
+      main_product,
+      content_objective,
+      target_audience,
+    } = req.body;
 
-    if (!name) {
+    if (
+      !name ||
+      !business_type ||
+      !main_product ||
+      !content_objective ||
+      !target_audience
+    ) {
       return res.status(400).json({
         success: false,
-        message: 'Organization name is required',
+        message: 'All fields are required',
       });
     }
 
@@ -39,11 +53,25 @@ export async function createOrganization(req: AuthRequest, res: Response) {
       counter++;
     }
 
+    // Generate business brief using AI
+    const business_brief = await generateBusinessBrief({
+      name,
+      business_type,
+      main_product,
+      content_objective,
+      target_audience,
+    });
+
     // Create organization
     const organization = await prisma.organizations.create({
       data: {
         name,
         slug,
+        business_type,
+        main_product,
+        content_objective,
+        target_audience,
+        business_brief,
       },
     });
 
@@ -63,6 +91,11 @@ export async function createOrganization(req: AuthRequest, res: Response) {
           id: organization.id,
           name: organization.name,
           slug: organization.slug,
+          business_type: organization.business_type,
+          main_product: organization.main_product,
+          content_objective: organization.content_objective,
+          target_audience: organization.target_audience,
+          business_brief: organization.business_brief,
           created_at: organization.created_at,
           updated_at: organization.updated_at,
         },

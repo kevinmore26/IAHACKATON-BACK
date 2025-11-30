@@ -29,6 +29,12 @@ model organizations {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
+  business_type     String?
+  main_product      String?
+  content_objective String?
+  target_audience   String?
+  business_brief    String?
+
   members user_organizations[]
 }
 
